@@ -1,0 +1,11 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/src/ScriptRunner.WinForms/obj
+/src/ScriptRunner.WinForms/bin/Debug/net8.0-windows
+/src/ScriptRunner.Data/bin/Debug/net8.0
+/src/ScriptRunner.Data/obj
+/src/ScriptRunner.Core/obj
+/src/ScriptRunner.Core/bin/Debug/net8.0
+/.vs
