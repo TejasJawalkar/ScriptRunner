@@ -8,6 +8,11 @@
     <BaseOutputPath>D:\Tutorials\PayrollSystemMain\wwwroot\bin</BaseOutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="bin\**" />
+    <EmbeddedResource Remove="bin\**" />
+    <None Remove="bin\**" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\ScriptRunner.Core\ScriptRunner.Core.csproj" />
     <ProjectReference Include="..\ScriptRunner.Data\ScriptRunner.Data.csproj" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
