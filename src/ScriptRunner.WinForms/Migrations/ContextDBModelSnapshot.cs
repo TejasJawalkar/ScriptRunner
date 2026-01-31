@@ -30,28 +30,49 @@ namespace ScriptRunner.WinForms.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ProfileId"));
 
-                    b.Property<string>("ConnectionName")
+                    b.Property<string>("ConnectionSource")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("ConnectionSource")
+                    b.HasKey("ProfileId");
+
+                    b.HasIndex("ConnectionSource")
+                        .IsUnique();
+
+                    b.ToTable("TSYProfiles");
+                });
+
+            modelBuilder.Entity("ScriptRunner.Core.Models.Databases", b =>
+                {
+                    b.Property<long>("DatabaseId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("DatabaseId"));
+
+                    b.Property<string>("ConnectionName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("EncryptedConnectionString")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<long>("ProfileId")
+                        .HasColumnType("bigint");
+
                     b.Property<string>("Provider")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("ProfileId");
+                    b.HasKey("DatabaseId");
 
                     b.HasIndex("ConnectionName")
                         .IsUnique();
 
-                    b.ToTable("TSYProfiles");
+                    b.HasIndex("ProfileId");
+
+                    b.ToTable("TSYDatabases");
                 });
 
             modelBuilder.Entity("ScriptRunner.Core.Models.ExceptionLog", b =>
@@ -82,6 +103,9 @@ namespace ScriptRunner.WinForms.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("ScriptId"));
 
+                    b.Property<long>("DatabaseId")
+                        .HasColumnType("bigint");
+
                     b.Property<DateTime>("ExecutedOn")
                         .HasColumnType("datetime2");
 
@@ -97,15 +121,15 @@ namespace ScriptRunner.WinForms.Migrations
 
                     b.HasKey("ScriptId");
 
-                    b.HasIndex("ProfileId");
+                    b.HasIndex("DatabaseId");
 
                     b.ToTable("TSYScripts");
                 });
 
-            modelBuilder.Entity("ScriptRunner.Core.Models.ExecutedScripts", b =>
+            modelBuilder.Entity("ScriptRunner.Core.Models.Databases", b =>
                 {
                     b.HasOne("ScriptRunner.Core.Models.ConnectionProfile", "connectionProfiles")
-                        .WithMany("ExecutedScripts")
+                        .WithMany("Databases")
                         .HasForeignKey("ProfileId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -113,7 +137,23 @@ namespace ScriptRunner.WinForms.Migrations
                     b.Navigation("connectionProfiles");
                 });
 
+            modelBuilder.Entity("ScriptRunner.Core.Models.ExecutedScripts", b =>
+                {
+                    b.HasOne("ScriptRunner.Core.Models.Databases", "database")
+                        .WithMany("ExecutedScripts")
+                        .HasForeignKey("DatabaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("database");
+                });
+
             modelBuilder.Entity("ScriptRunner.Core.Models.ConnectionProfile", b =>
+                {
+                    b.Navigation("Databases");
+                });
+
+            modelBuilder.Entity("ScriptRunner.Core.Models.Databases", b =>
                 {
                     b.Navigation("ExecutedScripts");
                 });

@@ -20,10 +20,10 @@ public class ScriptRunner
 
     public async Task<ScriptExecutionResult> RunAsync(ScriptRunnerInputs scriptRunInput)
     {
-        if (!_adapters.TryGetValue(scriptRunInput.profile.Provider, out var adapter))
-            throw new InvalidOperationException($"No adapter for provider {scriptRunInput.profile.Provider}");
+        if (!_adapters.TryGetValue(scriptRunInput.Provider, out var adapter))
+            throw new InvalidOperationException($"No adapter for provider {scriptRunInput.Provider}");
 
-        string connnectionString = scriptRunInput.profile.EncryptedConnectionString.Trim();
+        string connnectionString = scriptRunInput.EncryptedConnectionString.Trim();
 
         if (string.IsNullOrWhiteSpace(connnectionString))
             throw new InvalidOperationException("Connection string is empty");

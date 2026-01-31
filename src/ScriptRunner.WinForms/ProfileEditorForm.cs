@@ -26,16 +26,22 @@ public partial class ProfileEditorForm : Form
 
     private async void LoadProfiles()
     {
-        var profiles = await _profileService.GetAllProfiles();
-        _bs.DataSource = profiles.connectionProfiles;
-        lstProfiles.DisplayMember = nameof(ConnectionProfileDTO.ConnectionName);
-        lstProfiles.ValueMember = nameof(ConnectionProfileDTO.ProfileId);
-        lstProfiles.DataSource = _bs;
+        var values = await _profileService.GetAllProfiles();
+
+        var connectionprofile = values.Select(x => new ConnectionProfileDTO
+        {
+            ConnectionSource = x.Item1.ConnectionSource,
+            ProfileId = x.Item1.ProfileId
+        }).ToList();
+
+        lstProfiles.DataSource = connectionprofile;
+        lstProfiles.DisplayMember = "ConnectionSource";
+        lstProfiles.ValueMember = "ProfileId";
     }
 
     private void LstProfiles_SelectedIndexChanged(object sender, EventArgs e)
     {
-        if (lstProfiles.SelectedItem is ConnectionProfileDTO p)
+        if (lstProfiles.SelectedItem is SavingPRofileDatabase p)
         {
             txtName.Text = p.ConnectionName;
             cmbProvider.SelectedItem = p.Provider;
@@ -86,15 +92,12 @@ public partial class ProfileEditorForm : Form
     {
         try
         {
-            var profiles = await _profileService.GetAllProfiles(); /// get all saved profile and load in textaread to select
             var existing = lstProfiles.SelectedItem as ConnectionProfileDTO;
-            ConnectionProfileDTO profileDTO = new ConnectionProfileDTO();
-
-            profileDTO.ConnectionName = txtName.Text.Trim();
+            SavingPRofileDatabase profileDTO = new SavingPRofileDatabase();
+            profileDTO.ConnectionSource = ConnectionSourceTxt.Text;
+            profileDTO.ConnectionName = txtName.Text;
             profileDTO.Provider = cmbProvider.SelectedItem?.ToString() ?? "";
             profileDTO.EncryptedConnectionString = txtConn.Text;
-            profileDTO.ConnectionSource = ConnectionSourceTxt.Text.Trim() ?? "";
-            profileDTO.EncryptedConnectionString = profileDTO.EncryptedConnectionString;
 
             if (string.IsNullOrEmpty(profileDTO.ConnectionName) || string.IsNullOrEmpty(profileDTO.Provider) || string.IsNullOrEmpty(profileDTO.EncryptedConnectionString) || string.IsNullOrEmpty(profileDTO.ConnectionSource))
             {
@@ -116,7 +119,7 @@ public partial class ProfileEditorForm : Form
         }
     }
 
-    private async Task<Int32> SaveProfileInDB(ConnectionProfileDTO profileDTO)
+    private async Task<Int32> SaveProfileInDB(SavingPRofileDatabase profileDTO)
     {
         Int32 result = 0;
         try

@@ -15,6 +15,9 @@ namespace ScriptRunner.WinForms.Models
         public Boolean Status { get; set; }
         [Required]
         public Int64 ProfileId { get; set; }
+        [Required]
+        public Int64 DatabaseId { get; set; }
+
 
         public ExecutedScriptsDTO(ExecutedScripts executedScripts)
         {
@@ -22,6 +25,7 @@ namespace ScriptRunner.WinForms.Models
             executedScripts.ExecutedOn = ExecutedOn;
             executedScripts.Status = Status;
             executedScripts.ProfileId = ProfileId;
+            executedScripts.DatabaseId = DatabaseId;
         }
 
         public ExecutedScriptsDTO()

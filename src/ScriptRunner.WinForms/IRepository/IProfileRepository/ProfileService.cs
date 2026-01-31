@@ -19,20 +19,60 @@ namespace ScriptRunner.WinForms.IRepository.IProfileRepository
             _exceptionLogService = exceptionLogService;
         }
 
-        public async Task<OutputList> GetAllProfiles()
+        public async Task<List<Tuple<ConnectionProfileDTO, ConnectionsDTO>>> GetAllProfiles()
+        {
+
+            var Values = new List<Tuple<ConnectionProfileDTO, ConnectionsDTO>>();
+            try
+            {
+                Values = await (from profile in _contextDB.TSYProfiles
+                                join database in _contextDB.TSYDatabases
+                                on profile.ProfileId equals database.ProfileId
+                                select new Tuple<ConnectionProfileDTO, ConnectionsDTO>(
+                                    new ConnectionProfileDTO
+                                    {
+                                        ProfileId = profile.ProfileId,
+                                        ConnectionSource = profile.ConnectionSource
+                                    },
+                                    new ConnectionsDTO
+                                    {
+                                        ProfileId = database.ProfileId,
+                                        ConnectionName = database.ConnectionName,
+                                        Provider = database.Provider,
+                                        EncryptedConnectionString = database.EncryptedConnectionString,
+                                        DatabaseId = database.DatabaseId,
+                                    }
+                                )).ToListAsync();
+
+                return Values;
+            }
+            catch (Exception ex)
+            {
+                SystemExceptions systemExceptions = new SystemExceptions
+                {
+                    ErrorMessage = ex.Message,
+                    GeneratedDateTime = System.DateTime.UtcNow
+                };
+                await _exceptionLogService.SaveExceptionLog(systemExceptions);
+                return null;
+            }
+        }
+
+        public async Task<OutputList> GetDataBases(Int64 ProfileID)
         {
             OutputList outputList = new OutputList();
             try
             {
-                outputList.connectionProfiles = new List<ConnectionProfileDTO>();
-                outputList.connectionProfiles = await _contextDB.TSYProfiles.Select(p => new ConnectionProfileDTO
+                outputList.connections = new List<ConnectionsDTO>();
+                outputList.connections = await _contextDB.TSYDatabases.Where((x) => x.ProfileId == ProfileID).Select(p => new ConnectionsDTO
                 {
                     ProfileId = p.ProfileId,
                     ConnectionName = p.ConnectionName,
                     Provider = p.Provider,
                     EncryptedConnectionString = p.EncryptedConnectionString,
-                    ConnectionSource = p.ConnectionSource
+                    DatabaseId = p.DatabaseId,
                 }).ToListAsync();
+
                 return outputList;
             }
             catch (Exception ex)
@@ -55,9 +95,6 @@ namespace ScriptRunner.WinForms.IRepository.IProfileRepository
                 connectionProfile = await _contextDB.TSYProfiles.Where((x) => x.ProfileId == ProfileID).Select(p => new ConnectionProfileDTO
                 {
                     ProfileId = p.ProfileId,
-                    ConnectionName = p.ConnectionName,
-                    Provider = p.Provider,
-                    EncryptedConnectionString = p.EncryptedConnectionString,
                     ConnectionSource = p.ConnectionSource
                 }).FirstOrDefaultAsync();
                 return connectionProfile;
@@ -74,21 +111,19 @@ namespace ScriptRunner.WinForms.IRepository.IProfileRepository
             }
         }
 
-        public async Task<Int32> SaveProfiles(ConnectionProfileDTO profiles)
+        public async Task<Int32> SaveProfiles(SavingPRofileDatabase savingProfile)
         {
             try
             {
-                if (profiles != null)
+                var profile = new ConnectionProfile
                 {
-                    var connectionProfile = new ConnectionProfile
-                    {
-                        ConnectionName = profiles.ConnectionName,
-                        Provider = profiles.Provider,
-                        ConnectionSource = profiles.ConnectionSource,
-                        EncryptedConnectionString = profiles.EncryptedConnectionString
-                    };
-                    await _contextDB.TSYProfiles.AddAsync(connectionProfile);
+                    ConnectionSource = savingProfile.ConnectionSource
+                };
+                await _contextDB.TSYProfiles.AddAsync(profile);
+                if (profile != null)
+                {
                     await _contextDB.SaveChangesAsync();
+                    SaveDatabase(savingProfile, profile);
                 }
 
                 return 1;
@@ -102,6 +137,59 @@ namespace ScriptRunner.WinForms.IRepository.IProfileRepository
                 };
                 await _exceptionLogService.SaveExceptionLog(systemExceptions);
                 return 0;
+            }
+        }
+
+        private async void SaveDatabase(SavingPRofileDatabase savingProfile, ConnectionProfile profile)
+        {
+            try
+            {
+                var database = new Databases
+                {
+                    ProfileId = profile.ProfileId,
+                    ConnectionName = savingProfile.ConnectionName,
+                    Provider = savingProfile.Provider,
+                    EncryptedConnectionString = savingProfile.EncryptedConnectionString
+                };
+
+                await _contextDB.TSYDatabases.AddAsync(database);
+                await _contextDB.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                SystemExceptions systemExceptions = new SystemExceptions
+                {
+                    ErrorMessage = ex.Message,
+                    GeneratedDateTime = System.DateTime.UtcNow
+                };
+                await _exceptionLogService.SaveExceptionLog(systemExceptions);
+            }
+        }
+
+        public async Task<ConnectionsDTO> GetDatabaseByID(Int64 ProfileID)
+        {
+            ConnectionsDTO? connectionProfile = new ConnectionsDTO();
+            try
+            {
+                connectionProfile = await _contextDB.TSYDatabases.Where((x) => x.ProfileId == ProfileID).Select(p => new ConnectionsDTO
+                {
+                    ProfileId = p.ProfileId,
+                    DatabaseId = p.DatabaseId,
+                    ConnectionName = p.ConnectionName,
+                    Provider = p.Provider,
+                    EncryptedConnectionString = p.EncryptedConnectionString
+                }).FirstOrDefaultAsync();
+                return connectionProfile;
+            }
+            catch (Exception ex)
+            {
+                SystemExceptions systemExceptions = new SystemExceptions
+                {
+                    ErrorMessage = ex.Message,
+                    GeneratedDateTime = System.DateTime.UtcNow
+                };
+                await _exceptionLogService.SaveExceptionLog(systemExceptions);
+                return null;
             }
         }
     }

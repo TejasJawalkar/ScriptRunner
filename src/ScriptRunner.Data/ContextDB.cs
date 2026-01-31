@@ -15,6 +15,8 @@ namespace ScriptRunner.Data
         public DbSet<ExecutedScripts> TSYScripts { get; set; }
         public DbSet<ExceptionLog> TSYExceptionLogs { get; set; }
 
+        public DbSet<Databases> TSYDatabases { get; set; }
+
         #endregion
 
         #region OnModelCreating
@@ -24,8 +26,8 @@ namespace ScriptRunner.Data
             modelBuilder.Entity<ConnectionProfile>(entity =>
             {
                 entity.HasKey(e => e.ProfileId);
-                entity.HasIndex(e => e.ConnectionName).IsUnique();
-                entity.HasMany(e => e.ExecutedScripts)
+                entity.HasIndex(e => e.ConnectionSource).IsUnique();
+                entity.HasMany(e => e.Databases)
                       .WithOne(e => e.connectionProfiles)
                       .HasForeignKey(e => e.ProfileId)
                       .OnDelete(DeleteBehavior.Cascade);
@@ -39,6 +41,16 @@ namespace ScriptRunner.Data
             modelBuilder.Entity<ExceptionLog>(entity =>
             {
                 entity.HasKey(e => e.ExceptionId);
+            });
+
+            modelBuilder.Entity<Databases>(entity =>
+            {
+                entity.HasKey(e => e.DatabaseId);
+                entity.HasIndex(e => e.ConnectionName).IsUnique();
+                entity.HasMany(e => e.ExecutedScripts)
+                .WithOne(e => e.database)
+                .HasForeignKey(e => e.DatabaseId)
+                .OnDelete(DeleteBehavior.Cascade);
             });
         }
         #endregion

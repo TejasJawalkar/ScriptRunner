@@ -13,7 +13,9 @@ namespace ScriptRunner.Core.Models
         [Required]
         public Int64 ProfileId { get; set; }
         [Required]
+        public Int64 DatabaseId { get; set; }
+        [Required]
         public DateTime ExecutedOn { get; set; }
-        public ConnectionProfile connectionProfiles { get; set; } = null!;
+        public Databases database { get; set; } = null!;
     }
 }

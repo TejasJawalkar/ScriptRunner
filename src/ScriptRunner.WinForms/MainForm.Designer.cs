@@ -24,12 +24,8 @@ partial class MainForm
         txtLog = new TextBox();
         ProfileListBox = new ComboBox();
         label1 = new Label();
-        label2 = new Label();
-        label3 = new Label();
-        txtName = new TextBox();
-        textBox1 = new TextBox();
         label4 = new Label();
-        comboBox1 = new ComboBox();
+        DatabaseCombo = new ComboBox();
         SuspendLayout();
         // 
         // btnLoad
@@ -113,42 +109,6 @@ partial class MainForm
         label1.TabIndex = 12;
         label1.Text = "Connect Source:";
         // 
-        // label2
-        // 
-        label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        label2.Location = new Point(21, 82);
-        label2.Name = "label2";
-        label2.Size = new Size(113, 17);
-        label2.TabIndex = 13;
-        label2.Text = "Source Password:";
-        label2.Visible = false;
-        // 
-        // label3
-        // 
-        label3.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        label3.Location = new Point(21, 53);
-        label3.Name = "label3";
-        label3.Size = new Size(113, 17);
-        label3.TabIndex = 14;
-        label3.Text = "Source Password:";
-        label3.Visible = false;
-        // 
-        // txtName
-        // 
-        txtName.Location = new Point(140, 50);
-        txtName.Name = "txtName";
-        txtName.Size = new Size(243, 23);
-        txtName.TabIndex = 15;
-        txtName.Visible = false;
-        // 
-        // textBox1
-        // 
-        textBox1.Location = new Point(140, 79);
-        textBox1.Name = "textBox1";
-        textBox1.Size = new Size(243, 23);
-        textBox1.TabIndex = 16;
-        textBox1.Visible = false;
-        // 
         // label4
         // 
         label4.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
@@ -156,16 +116,16 @@ partial class MainForm
         label4.Name = "label4";
         label4.Size = new Size(113, 17);
         label4.TabIndex = 18;
-        label4.Text = "Connect Source:";
+        label4.Text = "Databases:";
         // 
-        // comboBox1
+        // DatabaseCombo
         // 
-        comboBox1.FlatStyle = FlatStyle.Popup;
-        comboBox1.FormattingEnabled = true;
-        comboBox1.Location = new Point(682, 21);
-        comboBox1.Name = "comboBox1";
-        comboBox1.Size = new Size(329, 23);
-        comboBox1.TabIndex = 17;
+        DatabaseCombo.FlatStyle = FlatStyle.Popup;
+        DatabaseCombo.FormattingEnabled = true;
+        DatabaseCombo.Location = new Point(682, 21);
+        DatabaseCombo.Name = "DatabaseCombo";
+        DatabaseCombo.Size = new Size(329, 23);
+        DatabaseCombo.TabIndex = 17;
         // 
         // MainForm
         // 
@@ -173,11 +133,7 @@ partial class MainForm
         AutoScaleMode = AutoScaleMode.Font;
         ClientSize = new Size(1041, 727);
         Controls.Add(label4);
-        Controls.Add(comboBox1);
-        Controls.Add(textBox1);
-        Controls.Add(txtName);
-        Controls.Add(label3);
-        Controls.Add(label2);
+        Controls.Add(DatabaseCombo);
         Controls.Add(label1);
         Controls.Add(ProfileListBox);
         Controls.Add(txtLog);
@@ -202,10 +158,6 @@ partial class MainForm
     private System.Windows.Forms.TextBox txtLog;
     private ComboBox ProfileListBox;
     private Label label1;
-    private Label label2;
-    private Label label3;
-    private TextBox txtName;
-    private TextBox textBox1;
     private Label label4;
-    private ComboBox comboBox1;
+    private ComboBox DatabaseCombo;
 }

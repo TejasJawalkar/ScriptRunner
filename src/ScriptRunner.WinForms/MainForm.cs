@@ -1,6 +1,5 @@
 using System.Data;
 using ScriptRunner.Core.DTOS;
-using ScriptRunner.Core.Models;
 using ScriptRunner.WinForms.DTO;
 using ScriptRunner.WinForms.IRepository.IProfileRepository;
 using ScriptRunner.WinForms.IRepository.IScriptRepository;
@@ -38,35 +37,29 @@ public partial class MainForm : Form
     private async void BtnRun_Click(object sender, EventArgs e)
     {
         txtLog.Clear();
-        ConnectionProfileDTO connectionProfileDTO = new ConnectionProfileDTO();
+        ConnectionsDTO connections = new ConnectionsDTO();
         ExecutedScriptsDTO executedScriptsDTO = new ExecutedScriptsDTO();
         try
         {
             if (ProfileListBox.SelectedIndex != 0)
             {
-                connectionProfileDTO = await _profileService.GetProfileByID(Convert.ToInt64(ProfileListBox.SelectedValue));
+                connections = await _profileService.GetDatabaseByID(Convert.ToInt64(DatabaseCombo.SelectedValue));
+
 
                 var cts = new CancellationTokenSource(TimeSpan.FromMinutes(10));
 
-                if (connectionProfileDTO != null)
+                if (connections != null)
                 {
-                    ConnectionProfile cProfile = new ConnectionProfile
-                    {
-                        ProfileId = connectionProfileDTO.ProfileId,
-                        ConnectionName = connectionProfileDTO.ConnectionName,
-                        Provider = connectionProfileDTO.Provider,
-                        ConnectionSource = connectionProfileDTO.ConnectionSource,
-                        EncryptedConnectionString = connectionProfileDTO.EncryptedConnectionString
-                    };
-
-                    executedScriptsDTO.ProfileId = connectionProfileDTO.ProfileId;
+                    executedScriptsDTO.ProfileId = connections.ProfileId;
                     executedScriptsDTO.ScriptText = txtScript.Text;
                     executedScriptsDTO.ExecutedOn = DateTime.Now;
+                    executedScriptsDTO.DatabaseId = connections.DatabaseId;
 
                     var input = new ScriptRunnerInputs
                     {
                         scriptText = txtScript.Text,
-                        profile = cProfile,
+                        EncryptedConnectionString = connections.EncryptedConnectionString,
+                        Provider = connections.Provider,
                         ct = cts.Token
                     };
                     var res = await _runner.RunAsync(input);
@@ -137,24 +130,24 @@ public partial class MainForm : Form
         try
         {
             DataTable dt = new DataTable();
-            var profiles = await _profileService.GetAllProfiles();
-            if (profiles.connectionProfiles.Count == 0)
+            var values = await _profileService.GetAllProfiles();
+            var comboboxdata = values.Select(x => new ConnectionProfileDTO
             {
-                OpenProfileEditDialog();
-            }
+                ConnectionSource = x.Item1.ConnectionSource,
+                ProfileId = x.Item1.ProfileId
+            }).ToList();
+            if (comboboxdata == null) { OpenProfileEditDialog(); }
             else
             {
-                profiles.connectionProfiles.Insert(0, new ConnectionProfileDTO
+
+                comboboxdata.Insert(0, new ConnectionProfileDTO
                 {
                     ProfileId = -1,
-                    ConnectionSource = "-Select Profile-"
+                    ConnectionSource = "-Select Database-"
                 });
-
-                ProfileListBox.DataSource = profiles.connectionProfiles;
+                ProfileListBox.DataSource = comboboxdata;
                 ProfileListBox.DisplayMember = "ConnectionSource";
                 ProfileListBox.ValueMember = "ProfileId";
-
-                ProfileListBox.SelectedIndex = 0;
             }
         }
         catch (Exception ex)
@@ -167,8 +160,35 @@ public partial class MainForm : Form
         }
     }
 
-    private void ProfileListBox_SelectedIndexChanged(object sender, EventArgs e)
+    private async void ProfileListBox_SelectedIndexChanged(object sender, EventArgs e)
     {
+        try
+        {
+            DataTable dt = new DataTable();
+            if (ProfileListBox.SelectedIndex > 0)
+            {
+                var profiles = await _profileService.GetDataBases(Convert.ToInt64(ProfileListBox.SelectedValue));
 
+                profiles.connections.Insert(0, new ConnectionsDTO
+                {
+                    ProfileId = -1,
+                    ConnectionName = "-Select Database-"
+                });
+
+                DatabaseCombo.DataSource = profiles.connections;
+                DatabaseCombo.DisplayMember = "ConnectionName";
+                DatabaseCombo.ValueMember = "DatabaseId";
+
+                DatabaseCombo.SelectedIndex = 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            systemExceptions = new SystemExceptions()
+            {
+                ErrorMessage = ex.Message
+            };
+            await _exceptionLogService.SaveExceptionLog(systemExceptions);
+        }
     }
 }
