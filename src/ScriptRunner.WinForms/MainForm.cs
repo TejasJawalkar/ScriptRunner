@@ -71,6 +71,7 @@ public partial class MainForm : Form
                     }
                     else
                     {
+                        txtScript.Text = string.Empty;
                         executedScriptsDTO.Status = false;
                         SaveExecutedScript(executedScriptsDTO);
                         txtLog.AppendText("Failed:\r\n" + res.Error?.Message + "\r\n" + res.Output);

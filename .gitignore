@@ -9,3 +9,4 @@
 /src/ScriptRunner.Core/obj
 /src/ScriptRunner.Core/bin/Debug/net8.0
 /.vs
+/src/ScriptRunner.WinForms/Migrations/
